@@ -1,0 +1,31 @@
+@import url("/css/base.css");
+@import url("/css/navbar.css");
+@import url("/css/home.css");
+@import url("/css/citas.css");
+@import url("/css/admin.css");
+@import url("/css/login.css");
+
+
+/* ===== Navbar logo (evitar que explote el layout) ===== */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-logo-btn{
+  border: 0;
+  background: transparent;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  line-height: 0;
+}
+
+.brand-logo{
+  width: 34px;      /* ajusta: 28–40 */
+  height: 34px;
+  object-fit: contain;
+  display: block;
+}

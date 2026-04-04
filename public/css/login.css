@@ -1,0 +1,30 @@
+.login-page {
+  display: flex;
+  justify-content: center;
+}
+
+.login-card {
+  width: min(480px, 100%);
+  display: grid;
+  gap: 18px;
+  padding: 24px;
+}
+
+.login-head h1 {
+  margin: 0 0 6px;
+}
+
+.login-head p {
+  margin: 0;
+}
+
+.login-form {
+  display: grid;
+  gap: 16px;
+}
+
+.login-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
