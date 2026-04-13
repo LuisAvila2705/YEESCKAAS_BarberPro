@@ -803,3 +803,17 @@
     flex: 1 1 auto;
   }
 }
+
+.week-cell.is-continued {
+  opacity: 0.9;
+}
+
+.week-continued {
+  font-size: 12px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.week-cell.is-continued .week-cell-content {
+  justify-content: center;
+}

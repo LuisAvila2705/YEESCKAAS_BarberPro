@@ -77,6 +77,27 @@ function getCellClass(row) {
   return "is-confirmed";
 }
 
+function toSlotIdFromHour(hour) {
+  return String(hour).replace(":", "");
+}
+
+function getHalfHourSlotIds(hour) {
+  const [h, m] = String(hour).split(":").map(Number);
+
+  const first = `${String(h).padStart(2, "0")}${String(m).padStart(2, "0")}`;
+  const secondMinutes = m + 15;
+  const secondHour = secondMinutes >= 60 ? h + 1 : h;
+  const secondMinuteNormalized = secondMinutes >= 60 ? secondMinutes - 60 : secondMinutes;
+
+  const second = `${String(secondHour).padStart(2, "0")}${String(secondMinuteNormalized).padStart(2, "0")}`;
+
+  return [first, second];
+}
+
+function isCellStart(row, hour) {
+  return row?.startTime === hour;
+}
+
 function buildWeekMap(weekRowsByDay) {
   const map = {};
 
@@ -84,9 +105,22 @@ function buildWeekMap(weekRowsByDay) {
     map[dateKey] = {};
 
     for (const row of rows) {
-      const start = row.startTime;
-      if (!start) continue;
-      map[dateKey][start] = row;
+      const occupied = Array.isArray(row.occupiedSlots) ? row.occupiedSlots : [];
+
+      for (const hour of HOURS) {
+        const cellSlotIds = getHalfHourSlotIds(hour);
+
+        const matchesCell = occupied.some((slotId) => cellSlotIds.includes(String(slotId)));
+
+        if (matchesCell) {
+          if (!map[dateKey][hour]) {
+            map[dateKey][hour] = {
+              row,
+              isStart: row.startTime === hour,
+            };
+          }
+        }
+      }
     }
   }
 
@@ -122,24 +156,33 @@ function renderWeeklyGrid(weekDays, weekRowsByDay) {
               <tr>
                 <td class="week-hour-cell">${hour}</td>
                 ${weekDays
-                  .map((day) => {
-                    const row = weekMap[day.dateKey]?.[hour] || null;
-                    return `
-                      <td class="week-cell ${getCellClass(row)}">
-                        ${
-                          row
-                            ? `
-                              <div class="week-cell-content">
-                                <strong>${shortLabel(row)}</strong>
-                                <span>${row.serviceName || row.note || "—"}</span>
-                              </div>
-                            `
-                            : `<span class="week-free">Libre</span>`
-                        }
-                      </td>
-                    `;
-                  })
-                  .join("")}
+  .map((day) => {
+    const cellData = weekMap[day.dateKey]?.[hour] || null;
+    const row = cellData?.row || null;
+    const isStart = !!cellData?.isStart;
+
+    return `
+      <td class="week-cell ${getCellClass(row)} ${!isStart && row ? "is-continued" : ""}">
+        ${
+          row
+            ? isStart
+              ? `
+                <div class="week-cell-content">
+                  <strong>${shortLabel(row)}</strong>
+                  <span>${row.serviceName || row.note || "—"}</span>
+                </div>
+              `
+              : `
+                <div class="week-cell-content">
+                  <span class="week-continued">Continúa</span>
+                </div>
+              `
+            : `<span class="week-free">Libre</span>`
+        }
+      </td>
+    `;
+  })
+  .join("")}
               </tr>
             `;
           }).join("")}
