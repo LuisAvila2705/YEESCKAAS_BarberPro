@@ -234,7 +234,7 @@ export function vistaInicio() {
       <div class="seccion-grid">
         <div class="panel">
           <h2>Horarios</h2>
-          <p class="muted">Horario de atención (editable cuando el dueño lo confirme).</p>
+          <p class="muted">Horario de atención a clientes.</p>
           <div class="tabla">
             ${horariosRows}
           </div>
