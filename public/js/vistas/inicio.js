@@ -223,7 +223,7 @@ export function vistaInicio() {
     <section class="contenedor seccion" id="servicios">
       <div class="seccion-head">
         <h2>Servicios y precios</h2>
-        <p>Selecciona el servicio y agenda en segundos.</p>
+        <p>Selecciona el servicio y agenda en segundos. Si acudes sin cita, corres el riesgo de que alguien con cita te anticipe tu lugar.</p>
       </div>
       <div class="grid-cards">
         ${serviciosCards}
