@@ -766,3 +766,40 @@
     justify-content: flex-start;
   }
 }
+
+
+
+.admin-week-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.admin-week-nav {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-week-range {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  color: #6b7280;
+}
+
+@media (max-width: 768px) {
+  .admin-week-toolbar {
+    align-items: stretch;
+  }
+
+  .admin-week-nav {
+    width: 100%;
+  }
+
+  .admin-week-nav .boton {
+    flex: 1 1 auto;
+  }
+}

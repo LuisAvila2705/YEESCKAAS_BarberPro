@@ -18,7 +18,7 @@ const DAY_NAMES = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 function getMonday(baseDate = new Date()) {
   const d = new Date(baseDate);
-  const day = d.getDay(); // 0 dom, 1 lun...
+  const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
   d.setDate(diff);
   d.setHours(0, 0, 0, 0);
@@ -31,14 +31,35 @@ function addDays(date, days) {
   return d;
 }
 
-function buildWeekDays(baseDate = new Date()) {
-  const monday = getMonday(baseDate);
-  return Array.from({ length: 6 }, (_, i) => addDays(monday, i)).map((date, index) => ({
-    index,
-    name: DAY_NAMES[index],
-    date,
-    dateKey: toDateKey(date),
-  }));
+function addWeeks(date, weeks) {
+  return addDays(date, weeks * 7);
+}
+
+function buildWeekDays(baseDate = new Date(), weekOffset = 0) {
+  const monday = getMonday(addWeeks(baseDate, weekOffset));
+  return Array.from({ length: 6 }, (_, i) => addDays(monday, i)).map(
+    (date, index) => ({
+      index,
+      name: DAY_NAMES[index],
+      date,
+      dateKey: toDateKey(date),
+    })
+  );
+}
+
+function formatDateShort(date) {
+  return new Intl.DateTimeFormat("es-MX", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  }).format(date);
+}
+
+function getWeekRangeLabel(weekDays) {
+  if (!weekDays.length) return "";
+  const first = weekDays[0].date;
+  const last = weekDays[weekDays.length - 1].date;
+  return `${formatDateShort(first)} al ${formatDateShort(last)}`;
 }
 
 function shortLabel(row) {
@@ -65,7 +86,6 @@ function buildWeekMap(weekRowsByDay) {
     for (const row of rows) {
       const start = row.startTime;
       if (!start) continue;
-
       map[dateKey][start] = row;
     }
   }
@@ -129,15 +149,18 @@ function renderWeeklyGrid(weekDays, weekRowsByDay) {
   `;
 }
 
-export function vistaAdminSemana() {
-  const app = document.getElementById("app");
-
+function clearWeekListeners() {
   if (window.__unsubAdminWeek && Array.isArray(window.__unsubAdminWeek)) {
     window.__unsubAdminWeek.forEach((fn) => fn && fn());
-    window.__unsubAdminWeek = [];
   }
+  window.__unsubAdminWeek = [];
+}
 
-  const weekDays = buildWeekDays(new Date());
+export function vistaAdminSemana() {
+  const app = document.getElementById("app");
+  let weekOffset = 0;
+
+  clearWeekListeners();
 
   app.innerHTML = `
     <section class="contenedor seccion admin-page">
@@ -151,6 +174,25 @@ export function vistaAdminSemana() {
       </div>
 
       <div class="panel admin-week-panel">
+        <div class="admin-week-toolbar">
+          <div class="admin-week-nav">
+            <button id="btnPrevWeek" class="boton boton-outline" type="button">
+              Semana anterior
+            </button>
+            <button id="btnCurrentWeek" class="boton boton-outline" type="button">
+              Semana actual
+            </button>
+            <button id="btnNextWeek" class="boton boton-outline" type="button">
+              Semana siguiente
+            </button>
+          </div>
+
+          <div class="admin-week-range">
+            <strong>Semana visible:</strong>
+            <span id="adminWeekRangeLabel">—</span>
+          </div>
+        </div>
+
         <div class="admin-week-legend">
           <span><i class="legend-box is-free"></i> Libre</span>
           <span><i class="legend-box is-confirmed"></i> Confirmada</span>
@@ -167,23 +209,46 @@ export function vistaAdminSemana() {
   `;
 
   const wrap = document.getElementById("adminWeekWrap");
-  const weekRowsByDay = {};
-  let loadedCount = 0;
+  const rangeLabel = document.getElementById("adminWeekRangeLabel");
+  const btnPrevWeek = document.getElementById("btnPrevWeek");
+  const btnCurrentWeek = document.getElementById("btnCurrentWeek");
+  const btnNextWeek = document.getElementById("btnNextWeek");
 
-  function repaint() {
-    wrap.innerHTML = renderWeeklyGrid(weekDays, weekRowsByDay);
+  function loadWeek() {
+    clearWeekListeners();
+
+    const weekDays = buildWeekDays(new Date(), weekOffset);
+    const weekRowsByDay = {};
+
+    rangeLabel.textContent = getWeekRangeLabel(weekDays);
+    wrap.innerHTML = `<p class="muted">Cargando agenda semanal...</p>`;
+
+    function repaint() {
+      wrap.innerHTML = renderWeeklyGrid(weekDays, weekRowsByDay);
+    }
+
+    window.__unsubAdminWeek = weekDays.map((day) =>
+      listenAppointmentsByDate(day.dateKey, (rows) => {
+        weekRowsByDay[day.dateKey] = rows || [];
+        repaint();
+      })
+    );
   }
 
-  window.__unsubAdminWeek = weekDays.map((day) =>
-    listenAppointmentsByDate(day.dateKey, (rows) => {
-      weekRowsByDay[day.dateKey] = rows || [];
-      loadedCount += 1;
+  btnPrevWeek.addEventListener("click", () => {
+    weekOffset -= 1;
+    loadWeek();
+  });
 
-      if (loadedCount >= weekDays.length) {
-        repaint();
-      } else {
-        repaint();
-      }
-    })
-  );
+  btnCurrentWeek.addEventListener("click", () => {
+    weekOffset = 0;
+    loadWeek();
+  });
+
+  btnNextWeek.addEventListener("click", () => {
+    weekOffset += 1;
+    loadWeek();
+  });
+
+  loadWeek();
 }
