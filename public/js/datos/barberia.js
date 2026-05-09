@@ -8,11 +8,11 @@ export const BARBERIA = {
   zonaCorta: "Cumbres de Santa Catarina",
   ciudadCorta: "Santa Catarina, N.L.",
   direccion:
-    "John Ruskin 2901, Cumbres de Santa Catarina Primer Sector, 66358 Cd. Santa Catarina, N.L.",
+    "Av Manuel Ordoñez 901 Local #10, Zimix Sector Leones, 66358 Cdad. Santa Catarina, N.L.", 
   googleMapsUrl:
     "https://www.google.com/maps/search/?api=1&query=" +
     encodeURIComponent(
-      "John Ruskin 2901, Cumbres de Santa Catarina Primer Sector, 66358 Cd. Santa Catarina, N.L."
+      "Av Manuel Ordoñez 901, Zimix Sector Leones, 66358 Cdad. Santa Catarina, N.L."
     ),
 
   // WhatsApp (REAL) -> Formato internacional para wa.me (MX = 52)
